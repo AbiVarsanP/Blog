@@ -2,9 +2,11 @@
 
 {% block content %}
     <h2>Create Post</h2>
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         <textarea name="content" placeholder="What's on your mind?" required></textarea>
-        <input type="text" name="media" placeholder="Media URL (optional)">
+        <input type="text" name="media_url" placeholder="Media URL (optional)">
+        <label for="media_file">Or upload an image:</label>
+        <input type="file" name="media_file" accept="image/*">
         <button type="submit">Post</button>
     </form>
 {% endblock %}
