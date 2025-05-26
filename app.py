@@ -2,9 +2,23 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import os
 from datetime import datetime
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
+
+# Configure upload folder
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Ensure upload folder exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# Check if file extension is allowed
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Database setup
 def init_db():
@@ -86,7 +100,16 @@ def create_post():
         return redirect(url_for('login'))
     if request.method == 'POST':
         content = request.form['content']
-        media = request.form.get('media', '')
+        media_url = request.form.get('media_url', '')
+        media = media_url
+        # Handle file upload if a file is provided
+        if 'media_file' in request.files:
+            file = request.files['media_file']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                media = file_path
         created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conn = sqlite3.connect('database.db')
         c = conn.cursor()
@@ -114,7 +137,16 @@ def edit_post(post_id):
         return redirect(url_for('index'))
     if request.method == 'POST':
         content = request.form['content']
-        media = request.form.get('media', '')
+        media_url = request.form.get('media_url', '')
+        media = media_url
+        # Handle file upload if a new file is provided
+        if 'media_file' in request.files:
+            file = request.files['media_file']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                media = file_path
         c.execute('UPDATE posts SET content = ?, media = ? WHERE id = ?', (content, media, post_id))
         conn.commit()
         conn.close()
