@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Create Post</h2>
+    <form method="POST">
+        <textarea name="content" placeholder="What's on your mind?" required></textarea>
+        <input type="text" name="media" placeholder="Media URL (optional)">
+        <button type="submit">Post</button>
+    </form>
+{% endblock %}
