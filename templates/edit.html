@@ -2,9 +2,14 @@
 
 {% block content %}
     <h2>Edit Post</h2>
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         <textarea name="content" required>{{ post[2] }}</textarea>
-        <input type="text" name="media" value="{{ post[3] }}" placeholder="Media URL (optional)">
+        <input type="text" name="media_url" value="{{ post[3] if not post[3].startswith('static/uploads') else '' }}" placeholder="Media URL (optional)">
+        <label for="media_file">Or upload a new image:</label>
+        <input type="file" name="media_file" accept="image/*">
+        {% if post[3] and post[3].startswith('static/uploads') %}
+            <p>Current Image: <img src="{{ url_for('static', filename=post[3].split('static/')[1]) }}" alt="Current Image" style="max-width: 150px; border-radius: 5px;"></p>
+        {% endif %}
         <button type="submit">Update</button>
     </form>
 {% endblock %}
